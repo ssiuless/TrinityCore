@@ -526,16 +526,15 @@ SpellValue::SpellValue(SpellInfo const* proto)
 class TC_GAME_API SpellEvent : public BasicEvent
 {
 public:
-    friend class Spell;
-
     SpellEvent(Spell* spell);
     ~SpellEvent();
 
     bool Execute(uint64 e_time, uint32 p_time) override;
     void Abort(uint64 e_time) override;
     bool IsDeletable() const override;
+    Spell const* GetSpell() const { return m_Spell; }
 
-private:
+protected:
     Spell* m_Spell;
 };
 
@@ -5376,7 +5375,7 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGoT
 /*static*/ Spell const* Spell::ExtractSpellFromEvent(BasicEvent* event)
 {
     if (SpellEvent* spellEvent = dynamic_cast<SpellEvent*>(event))
-        return spellEvent->m_Spell;
+        return spellEvent->GetSpell();
 
     return nullptr;
 }
@@ -7596,11 +7595,6 @@ void SpellEvent::Abort(uint64 /*e_time*/)
 bool SpellEvent::IsDeletable() const
 {
     return m_Spell->IsDeletable();
-}
-
-uint32 SpellEvent::GetSpellId() const
-{
-    return m_Spell->GetSpellInfo()->Id;
 }
 
 bool Spell::IsValidDeadOrAliveTarget(Unit const* target) const
