@@ -12522,11 +12522,11 @@ void Unit::CancelSpellMissiles(uint32 spellId, bool reverseMissile /*= false*/)
 
     for (auto itr : eventList)
     {
-        if (SpellEvent* spellEvent = dynamic_cast<SpellEvent*>(itr.second))
+        if (Spell const* spell = Spell::ExtractSpellFromEvent(itr.second))
         {
-            if (spellEvent->GetSpellId() == spellId)
+            if (spell->GetSpellInfo()->Id == spellId)
             {
-                spellEvent->ScheduleAbort();
+                itr.second->ScheduleAbort();
                 hasMissile = true;
             }
         }

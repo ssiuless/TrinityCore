@@ -20,7 +20,6 @@
 
 #include "ConditionMgr.h"
 #include "DBCEnums.h"
-#include "EventProcessor.h"
 #include "ObjectGuid.h"
 #include "Position.h"
 #include "SharedDefines.h"
@@ -38,6 +37,7 @@ namespace WorldPackets
 
 class Aura;
 class AuraEffect;
+class BasicEvent;
 class ByteBuffer;
 class Corpse;
 class DynamicObject;
@@ -257,21 +257,6 @@ enum SpellEffectHandleMode
 typedef std::vector<std::pair<uint32, ObjectGuid>> DispelList;
 
 static const uint32 SPELL_INTERRUPT_NONPLAYER = 32747;
-
-class TC_GAME_API SpellEvent : public BasicEvent
-{
-public:
-    SpellEvent(Spell* spell);
-    ~SpellEvent();
-
-    bool Execute(uint64 e_time, uint32 p_time) override;
-    void Abort(uint64 e_time) override;
-    bool IsDeletable() const override;
-    uint32 GetSpellId() const;
-
-protected:
-    Spell* m_Spell;
-};
 
 class TC_GAME_API Spell
 {
@@ -527,6 +512,7 @@ class TC_GAME_API Spell
         void HandleHolyPower(Player* caster);
         void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGoTarget, Corpse* pCorpseTarget, uint32 i, SpellEffectHandleMode mode);
         void HandleThreatSpells();
+        static Spell const* ExtractSpellFromEvent(BasicEvent* event);
 
         SpellInfo const* const m_spellInfo;
         Item* m_CastItem;

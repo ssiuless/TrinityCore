@@ -523,6 +523,22 @@ SpellValue::SpellValue(SpellInfo const* proto)
     AuraDuration = 0;
 }
 
+class TC_GAME_API SpellEvent : public BasicEvent
+{
+public:
+    friend class Spell;
+
+    SpellEvent(Spell* spell);
+    ~SpellEvent();
+
+    bool Execute(uint64 e_time, uint32 p_time) override;
+    void Abort(uint64 e_time) override;
+    bool IsDeletable() const override;
+
+private:
+    Spell* m_Spell;
+};
+
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID, bool skipCheck) :
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
 m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
@@ -5355,6 +5371,14 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGoT
     {
         (this->*SpellEffects[eff])((SpellEffIndex)i);
     }
+}
+
+/*static*/ Spell const* Spell::ExtractSpellFromEvent(BasicEvent* event)
+{
+    if (SpellEvent* spellEvent = dynamic_cast<SpellEvent*>(event))
+        return spellEvent->m_Spell;
+
+    return nullptr;
 }
 
 SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint32* param2 /*= nullptr*/, MountResult* mountResult /*= nullptr*/)
