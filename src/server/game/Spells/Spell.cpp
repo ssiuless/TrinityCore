@@ -523,20 +523,6 @@ SpellValue::SpellValue(SpellInfo const* proto)
     AuraDuration = 0;
 }
 
-class TC_GAME_API SpellEvent : public BasicEvent
-{
-    public:
-        SpellEvent(Spell* spell);
-        ~SpellEvent();
-
-        virtual bool Execute(uint64 e_time, uint32 p_time) override;
-        virtual void Abort(uint64 e_time) override;
-        virtual bool IsDeletable() const override;
-
-    protected:
-        Spell* m_Spell;
-};
-
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID, bool skipCheck) :
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
 m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
@@ -7586,6 +7572,11 @@ void SpellEvent::Abort(uint64 /*e_time*/)
 bool SpellEvent::IsDeletable() const
 {
     return m_Spell->IsDeletable();
+}
+
+uint32 SpellEvent::GetSpellId() const
+{
+    return m_Spell->GetSpellInfo()->Id;
 }
 
 bool Spell::IsValidDeadOrAliveTarget(Unit const* target) const
